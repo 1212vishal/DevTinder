@@ -1,19 +1,27 @@
 const express = require("express");
-
 const app = express();
+const { auth } = require("./middleware/auth");
 
 
+app.get("/admin/userData", auth,
 
-app.use("/hello", (req, res) => {
-    res.send("Hello World");
-})
+    (req, res, next) => {
+        next();
+        //res.send("User data has been sent");
+    },
+    (req, res) => {
+        throw new console.error();
 
-
-app.use("/test", (req, res) => {
-    res.send("Hello World test");
-})
-app.use("/", (req, res) => {
-    res.send("vishal Kumar");
+        //res.send("User data has been sent form 3");
+    },
+    (err, req, res, nex) => {
+        if (err) {
+            res.send("Error Please check it");
+        }
+    }
+)
+app.get("/admin/userLogin", auth, (req, res) => {
+    res.send("User Login Successfully");
 })
 
 app.listen(3000);
