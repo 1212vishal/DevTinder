@@ -58,7 +58,7 @@ app.delete("/user", async (req, res) => {
     }
 })
 
-//API FOR UPDATE USER INFORMATION
+//API FOR UPDATE USER INFORMATION   
 app.patch("/user", async (req, res) => {
 
     const userId = req.body.userId;
