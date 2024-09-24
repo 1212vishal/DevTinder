@@ -59,32 +59,43 @@ app.delete("/user", async (req, res) => {
 })
 
 //API FOR UPDATE USER INFORMATION   
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
 
-    const userId = req.body.userId;
+    const userId = req.params?.userId;
     const data = req.body;
 
 
     try {
-        const beforeUpdate = await User.findByIdAndUpdate({ _id: userId }, data);
+        const ALLOWED_UPDATES = ["age", "skill", "gender", "about", "photoURL"];
+        const isUpdateAllowed = Object.keys(data).every((k) => ALLOWED_UPDATES.includes(k));
+        console.log(isUpdateAllowed);
 
-        res.send(beforeUpdate);
+        if (!isUpdateAllowed) {
+            throw new Error("Updates not Allowed");
+        }
+        if (data.skill?.length() > 10) {
+            throw new Error("Skill size greater than 10 not allowed");
+        }
+        const beforeUpdate = await User.findByIdAndUpdate({ _id: userId }, data, { runValidators: true, });
+        //  console.log(beforeUpdate);
+
+        res.send("Update successfully");
     }
     catch (err) {
-        res.send("some error has been arised");
+        res.send(err.message);
     }
 })
 
 //API TO SIGNUP
 app.post("/signup", async (req, res) => {
-    console.log(req.body);
+    //console.log(req.body);
     const user = new User(req.body);
     try {
         await user.save();
         res.send("User signup successfully");
     }
     catch (err) {
-        res.status(400).send("User not signup successfully");
+        res.status(400).send(err.message);
     }
 })
 
