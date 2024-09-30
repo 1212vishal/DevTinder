@@ -3,8 +3,12 @@ const { connectDb } = require("./config/database");
 const User = require("./models/user");
 const { signUpValidation, signInValidation } = require("./utils/validate");
 const bcrypt = require("bcrypt");
+const cookieParser = require('cookie-parser');
+const jwt = require("jsonwebtoken");
+
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 // API TO FIND ONE USER
 app.get("/user", async (req, res) => {
@@ -125,6 +129,9 @@ app.post("/login", async (req, res) => {
         }
         const isPassWordValid = await bcrypt.compare(password, user.password);
         if (isPassWordValid) {
+            token = jwt.sign({ _id: user._id }, "secretkeyappearshere");
+            res.cookie("token", token);
+            console.log("token send");
             res.send("User login successfully");
         }
         else {
@@ -138,7 +145,22 @@ app.post("/login", async (req, res) => {
 
 })
 
-
+app.get("/profile", async (req, res) => {
+    try {
+        const { token } = req.cookies;
+        //console.log(token);
+        if (!token) {
+            throw new Error("token is not valid");
+        }
+        const decodedToken = await jwt.verify(token, "secretkeyappearshere");
+        //console.log(decodedToken);
+        const user = await User.find({ _id: token._id });
+        res.send(user);
+    }
+    catch (err) {
+        res.send(err.message);
+    }
+})
 
 
 connectDb()
