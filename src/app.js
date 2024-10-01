@@ -5,6 +5,7 @@ const { signUpValidation, signInValidation } = require("./utils/validate");
 const bcrypt = require("bcrypt");
 const cookieParser = require('cookie-parser');
 const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middleware/auth");
 
 const app = express();
 app.use(express.json());
@@ -127,11 +128,10 @@ app.post("/login", async (req, res) => {
         if (!user) {
             throw new Error("emailId is not valid");
         }
-        const isPassWordValid = await bcrypt.compare(password, user.password);
+        const isPassWordValid = await user.validatePassword(password);
         if (isPassWordValid) {
-            token = jwt.sign({ _id: user._id }, "secretkeyappearshere");
+            const token = await user.getJWT();
             res.cookie("token", token);
-            console.log("token send");
             res.send("User login successfully");
         }
         else {
@@ -145,16 +145,9 @@ app.post("/login", async (req, res) => {
 
 })
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
     try {
-        const { token } = req.cookies;
-        //console.log(token);
-        if (!token) {
-            throw new Error("token is not valid");
-        }
-        const decodedToken = await jwt.verify(token, "secretkeyappearshere");
-        //console.log(decodedToken);
-        const user = await User.find({ _id: token._id });
+        const user = req.user;
         res.send(user);
     }
     catch (err) {

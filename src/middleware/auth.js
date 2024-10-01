@@ -1,14 +1,23 @@
+const User = require("../models/user");
+const jwt = require("jsonwebtoken");
 
-const auth = (req, res, next) => {
-    //console.log("I,m come back")
-    const token = "1234";
-    const flag = token === "1234";
-    if (flag) {
+const userAuth = async (req, res, next) => {
+    try {
+        const { token } = req.cookies;
+
+        if (!token) {
+            throw new Error("token is not valid");
+        }
+        const decodedToken = await jwt.verify(token, "secretkeyappearshere");
+
+        const { _id } = decodedToken;
+        const user = await User.findById(_id);
+        req.user = user;
         next();
     }
-    else {
-        res.status(404).send("Not Authorised");
+    catch (err) {
+        res.send(err.message);
     }
 };
 
-module.exports = { auth };
+module.exports = { userAuth };
