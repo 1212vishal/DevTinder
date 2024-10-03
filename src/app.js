@@ -4,11 +4,16 @@ const User = require("./models/user");
 const cookieParser = require('cookie-parser');
 const profileRoutes = require("./routes/profile");
 const authRoutes = require("./routes/auth");
+const requestRoutes = require("./routes/request");
 const app = express();
+
+
+
 app.use(express.json());
 app.use(cookieParser());
 app.use("/", profileRoutes);
 app.use("/", authRoutes);
+app.use("/", requestRoutes);
 
 // API TO FIND ONE USER
 app.get("/user", async (req, res) => {
