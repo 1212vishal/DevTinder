@@ -21,4 +21,13 @@ const signInValidation = (req) => {
     }
 };
 
-module.exports = { signUpValidation, signInValidation };
+const editValidation = (req) => {
+    const ALLOWED_UPDATES = ["age", "skill", "gender", "about", "photoURL"];
+    // console.log("I'm here");
+    // console.log(req.body);
+    const isUpdateAllowed = Object.keys(req.body).every((k) => ALLOWED_UPDATES.includes(k));
+    //console.log(isUpdateAllowed);
+    return isUpdateAllowed;
+};
+
+module.exports = { signUpValidation, signInValidation, editValidation };
